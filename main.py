@@ -10,20 +10,6 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-def calculate_water_status(water_level, normal_level):
-    """คำนวณสถานการณ์น้ำจากระดับน้ำและระดับตลิ่ง"""
-    water_percentage = (water_level / normal_level) * 100
-    if water_level > normal_level:
-        return "น้ำล้นตลิ่ง"
-    elif water_percentage > 100:
-        return "น้ำมาก"
-    elif water_percentage > 70:
-        return "น้ำปกติ"
-    elif water_percentage > 30:
-        return "น้ำน้อย"
-    else:
-        return "น้ำน้อยวิกฤต"
-
 def scrape_data():
     """ดึงข้อมูลจากเว็บและจัดกลุ่มตามอำเภอ"""
     chrome_options = Options()
@@ -51,7 +37,6 @@ def scrape_data():
                     station = station_column.get_text(strip=True)
                     location = columns[0].get_text(strip=True)
                     water_level = float(columns[1].get_text(strip=True))
-                    normal_level = float(columns[2].get_text(strip=True))
                     water_status = columns[3].get_text(strip=True)
                     timeWater = columns[6].get_text(strip=True) if len(columns) > 6 else ""
                     amphur = ""
@@ -106,5 +91,5 @@ def scrape_endpoint():
     return JSONResponse(content=data)
 
 if __name__ == "__main__":
-    uvicorn.run("test:app", host="0.0.0.0", port=3000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=3000, reload=True)
 
