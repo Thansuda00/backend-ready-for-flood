@@ -1,5 +1,5 @@
 fastapi
 uvicorn[standard]
-gunicorn
-python-dotenv
-requests
+selenium
+webdriver-manager
+beautifulsoup4

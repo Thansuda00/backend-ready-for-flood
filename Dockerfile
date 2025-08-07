@@ -1,28 +1,42 @@
-# Use an official Python image as a base
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-# Install system dependencies for Chromium and Selenium
-RUN apt-get update && \
-    apt-get install -y wget gnupg2 && \
-    apt-get install -y chromium chromium-driver && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Prevent buffer delays in Docker logs
+ENV PYTHONUNBUFFERED=1
 
-# Set environment variables for Chromium
+# Set env vars for Chromium path
 ENV CHROME_BIN=/usr/bin/chromium
-ENV CHROMEDRIVER_BIN=/usr/bin/chromedriver
+ENV CHROMEDRIVER=/usr/bin/chromedriver
 
-# Set work directory
+# Install Chromium browser and dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libx11-xcb1 \
+    libgbm1 \
+    libgtk-3-0 \
+    libasound2 \
+    libxcomposite1 \
+    fonts-liberation \
+    wget \
+    curl \
+    unzip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Copy the rest of the code
+# Copy source code
 COPY . .
 
-# Expose the port (change if needed)
-EXPOSE 10000
+# Expose FastAPI port
+EXPOSE 8000
 
-# Start the app with Uvicorn
-CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=10000"]
+# Run FastAPI with Uvicorn
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,8 +1,8 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 import time
 from bs4 import BeautifulSoup
 from fastapi import FastAPI
@@ -13,9 +13,11 @@ import uvicorn
 def scrape_data():
     """ดึงข้อมูลจากเว็บและจัดกลุ่มตามอำเภอ"""
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    # Specify Chrome binary location if needed:
-    # chrome_options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     url = "https://chiangrai.thaiwater.net/wl"
     driver.get(url)
@@ -91,5 +93,5 @@ def scrape_endpoint():
     return JSONResponse(content=data)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=3000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
