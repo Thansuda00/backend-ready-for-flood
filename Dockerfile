@@ -1,14 +1,14 @@
 FROM python:3.10-slim
 
-# Prevent buffer delays in Docker logs
+# Prevent Python from buffering stdout/stderr
 ENV PYTHONUNBUFFERED=1
 
-# Set env vars for Chromium path
+# Set environment variables for Chromium
 ENV CHROME_BIN=/usr/bin/chromium
 ENV CHROMEDRIVER=/usr/bin/chromedriver
 
-# Install Chromium browser and dependencies
-RUN apt-get update && apt-get install -y \
+# Install system dependencies and Chromium
+RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     chromium-driver \
     libnss3 \
@@ -19,24 +19,24 @@ RUN apt-get update && apt-get install -y \
     libasound2 \
     libxcomposite1 \
     fonts-liberation \
-    wget \
     curl \
     unzip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Install Python dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copy application source code
 COPY . .
 
 # Expose FastAPI port
 EXPOSE 8000
 
-# Run FastAPI with Uvicorn
+# Default command to run FastAPI app
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

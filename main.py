@@ -9,16 +9,24 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import os
 
-def scrape_data():
-    """ดึงข้อมูลจากเว็บและจัดกลุ่มตามอำเภอ"""
+def get_driver():
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    # Use Chromium binary installed in container
+    chrome_path = os.environ.get("CHROME_BIN", "/usr/bin/chromium")
+    chrome_options.binary_location = chrome_path
+
+    service = Service(executable_path=os.environ.get("CHROMEDRIVER", "/usr/bin/chromedriver"))
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    return driver
+
+def scrape_data():
+    driver = get_driver()
     url = "https://chiangrai.thaiwater.net/wl"
     driver.get(url)
     time.sleep(5)  # Wait for JS to load data
